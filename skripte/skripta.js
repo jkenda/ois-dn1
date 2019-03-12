@@ -84,6 +84,12 @@ window.addEventListener('load', function () {
       dodajRestavracije();
     });
 
+  document.getElementById("radij")
+    .addEventListener("keyup", function() {
+      prikaziObmocje();
+      posodobiOznakeNaZemljevidu();
+    })
+
     document.getElementById("fakultete_rezultati").innerHTML = 0;
     document.getElementById("restavracije_rezultati").innerHTML = 0;
 
@@ -136,7 +142,6 @@ function pridobiPodatke(vrstaInteresneTocke, callback) {
         var json = JSON.parse(xobj.responseText);
 
         // nastavimo ustrezna polja (število najdenih zadetkov)
-        console.log(json.features);
         document.getElementById(vrstaInteresneTocke + "_rezultati").innerHTML = json.features.length;
         // vrnemo rezultat
         callback(json);
@@ -215,7 +220,27 @@ function izrisRezultatov(jsonRezultat) {
  */
 function posodobiOznakeNaZemljevidu() {
   // FRI marker pustimo, ostale odstranimo
+  for (var i=1; i < markerji.length; i++) {
+    //console.log(markerji[i]._latlng.lat);
+    if (prikaziOznako(markerji[i]._latlng.lng, markerji[i]._latlng.lat) && !mapa.hasLayer(markerji[i])) {
+      mapa.addLayer(markerji[i]);
+    }
+    else if (!prikaziOznako(markerji[i]._latlng.lng, markerji[i]._latlng.lat) && mapa.hasLayer(markerji[i])) {
+      mapa.removeLayer(markerji[i]);
+    }
+  }
+  if (document.getElementById("dodajFakultete").disabled) {
+    pridobiPodatke("fakultete", function (jsonRezultat) {
+      izrisRezultatov(jsonRezultat);
+    });
+  }
+  if (document.getElementById("dodajRestavracije").disabled) {
+    pridobiPodatke("restavracije", function (jsonRezultat) {
+      izrisRezultatov(jsonRezultat);
+    });
+  }
 }
+
 
 
 /**
