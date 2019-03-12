@@ -50,12 +50,12 @@ window.addEventListener('load', function () {
   }
 
   mapa.on('click', obKlikuNaMapo);
-  
+
   document.getElementById("izbrisiRezultate")
     .addEventListener("click", function() {
       // Odstrani vse oznake iz zemljevida
       for (var i=1; i < markerji.length; i++) {
-        mapa.removeLayer(markerji[i]);  
+        mapa.removeLayer(markerji[i]);
       }
       // Odstrani vse oznake, razen FRI
       markerji.splice(1);
@@ -73,7 +73,17 @@ window.addEventListener('load', function () {
     .addEventListener("click", function() {
       prikaziObmocje();
     });
-  
+
+  document.getElementById("dodajFakultete")
+    .addEventListener("click", function() {
+      dodajFakultete();
+    });
+
+  document.getElementById("dodajRestavracije")
+    .addEventListener("click", function() {
+      dodajRestavracije();
+    });
+
 });
 
 
@@ -91,11 +101,11 @@ function dodajFakultete() {
 
 
 /**
- * Na zemljevid dodaj oznake z bližnjimi restavracijami in 
+ * Na zemljevid dodaj oznake z bližnjimi restavracijami in
  * gumb onemogoči.
  */
 function dodajRestavracije() {
-  pridobiPodatke(function (jsonRezultat) {
+  pridobiPodatke("restavracije", function (jsonRezultat) {
     izrisRezultatov(jsonRezultat);
     document.getElementById("dodajRestavracije").disabled = true;
     document.getElementById("izbrisiRezultate").disabled = false;
@@ -106,7 +116,7 @@ function dodajRestavracije() {
 /**
  * Za podano vrsto interesne točke dostopaj do JSON datoteke
  * in vsebino JSON datoteke vrni v povratnem klicu
- * 
+ *
  * @param vrstaInteresneTocke "fakultete" ali "restavracije"
  * @param callback povratni klic z vsebino zahtevane JSON datoteke
  */
@@ -115,15 +125,15 @@ function pridobiPodatke(vrstaInteresneTocke, callback) {
 
   var xobj = new XMLHttpRequest();
   xobj.overrideMimeType("application/json");
-  xobj.open("GET", "https://teaching.lavbic.net/cdn/OIS/DN1/" + 
+  xobj.open("GET", "https://teaching.lavbic.net/cdn/OIS/DN1/" +
     vrstaInteresneTocke + ".json", true);
   xobj.onreadystatechange = function () {
     // rezultat ob uspešno prebrani datoteki
     if (xobj.readyState == 4 && xobj.status == "200") {
         var json = JSON.parse(xobj.responseText);
-        
+
         // nastavimo ustrezna polja (število najdenih zadetkov)
-        
+
         // vrnemo rezultat
         callback(json);
     }
@@ -137,7 +147,7 @@ function pridobiPodatke(vrstaInteresneTocke, callback) {
  * z dodatnim opisom, ki se prikaže v oblačku ob kliku in barvo
  * ikone, glede na tip oznake (FRI = rdeča, druge fakultete = modra in
  * restavracije = zelena)
- * 
+ *
  * @param lat zemljepisna širina
  * @param lng zemljepisna dolžina
  * @param opis sporočilo, ki se prikaže v oblačku
@@ -145,11 +155,11 @@ function pridobiPodatke(vrstaInteresneTocke, callback) {
  */
 function dodajMarker(lat, lng, opis, tip) {
   var ikona = new L.Icon({
-    iconUrl: 'https://teaching.lavbic.net/cdn/OIS/DN1/' + 
-      'marker-icon-2x-' + 
-      (tip == 'FRI' ? 'red' : (tip == 'restaurant' ? 'green' : 'blue')) + 
+    iconUrl: 'https://teaching.lavbic.net/cdn/OIS/DN1/' +
+      'marker-icon-2x-' +
+      (tip == 'FRI' ? 'red' : (tip == 'restaurant' ? 'green' : 'blue')) +
       '.png',
-    shadowUrl: 'https://teaching.lavbic.net/cdn/OIS/DN1/' + 
+    shadowUrl: 'https://teaching.lavbic.net/cdn/OIS/DN1/' +
       'marker-shadow.png',
     iconSize: [25, 41],
     iconAnchor: [12, 41],
@@ -157,7 +167,7 @@ function dodajMarker(lat, lng, opis, tip) {
     shadowSize: [41, 41]
   });
 
-  // Ustvarimo marker z vhodnima podatkoma koordinat 
+  // Ustvarimo marker z vhodnima podatkoma koordinat
   // in barvo ikone, glede na tip
   var marker = L.marker([lat, lng], {icon: ikona});
 
@@ -173,21 +183,21 @@ function dodajMarker(lat, lng, opis, tip) {
 /**
  * Na podlagi podanih interesnih točk v GeoJSON obliki izriši
  * posamezne točke na zemljevid
- * 
+ *
  * @param jsonRezultat interesne točke v GeoJSON obliki
  */
 function izrisRezultatov(jsonRezultat) {
   var znacilnosti = jsonRezultat.features;
 
   for (var i = 0; i < znacilnosti.length; i++) {
-    var jeObmocje = 
+    var jeObmocje =
       typeof(znacilnosti[i].geometry.coordinates[0]) == "object";
     var opis = znacilnosti[i].properties.name;
 
     // pridobimo koordinate
-    var lng = jeObmocje ? znacilnosti[i].geometry.coordinates[0][0][0] : 
+    var lng = jeObmocje ? znacilnosti[i].geometry.coordinates[0][0][0] :
       znacilnosti[i].geometry.coordinates[0];
-    var lat = jeObmocje ? znacilnosti[i].geometry.coordinates[0][0][1] : 
+    var lat = jeObmocje ? znacilnosti[i].geometry.coordinates[0][0][1] :
       znacilnosti[i].geometry.coordinates[1];
     if (prikaziOznako(lng, lat))
       dodajMarker(lat, lng, opis, znacilnosti[i].properties.amenity);
@@ -206,7 +216,7 @@ function posodobiOznakeNaZemljevidu() {
 
 /**
  * Prikaz poti od/do izbrane lokacije do/od FRI
- * 
+ *
  * @param latLng izbrana točka na zemljevidu
  */
 function prikazPoti(latLng) {
@@ -221,10 +231,10 @@ function prikazPoti(latLng) {
  * Preveri ali izbrano oznako na podanih GPS koordinatah izrišemo
  * na zemljevid glede uporabniško določeno vrednost radij, ki
  * predstavlja razdaljo od FRI.
- * 
+ *
  * Če radij ni določen, je enak 0 oz. je večji od razdalje izbrane
  * oznake od FRI, potem oznako izrišemo, sicer ne.
- * 
+ *
  * @param lat zemljepisna širina
  * @param lng zemljepisna dolžina
  */
@@ -232,7 +242,7 @@ function prikaziOznako(lng, lat) {
   var radij = vrniRadij();
   if (radij == 0)
     return true;
-  else if (distance(lat, lng, FRI_LAT, FRI_LNG, "K") >= radij) 
+  else if (distance(lat, lng, FRI_LAT, FRI_LNG, "K") >= radij)
     return false;
   else
     return true;
@@ -241,7 +251,7 @@ function prikaziOznako(lng, lat) {
 
 /**
  * Na zemljevidu nariši rdeč krog z transparentnim rdečim polnilom
- * s središčem na lokaciji FRI in radijem. Območje se izriše 
+ * s središčem na lokaciji FRI in radijem. Območje se izriše
  * le, če je na strani izbrana vrednost "Prikaz radija".
  */
 function prikaziObmocje() {
@@ -260,7 +270,7 @@ function prikaziObmocje() {
 
 
 /**
- * Vrni celoštevilsko vrednost radija, ki ga uporabnik vnese v 
+ * Vrni celoštevilsko vrednost radija, ki ga uporabnik vnese v
  * vnosno polje. Če uporabnik vnese neveljavne podatke, je
  * privzeta vrednost radija 0.
  */
