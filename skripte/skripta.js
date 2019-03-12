@@ -84,6 +84,9 @@ window.addEventListener('load', function () {
       dodajRestavracije();
     });
 
+    document.getElementById("fakultete_rezultati").innerHTML = 0;
+    document.getElementById("restavracije_rezultati").innerHTML = 0;
+
 });
 
 
@@ -133,7 +136,8 @@ function pridobiPodatke(vrstaInteresneTocke, callback) {
         var json = JSON.parse(xobj.responseText);
 
         // nastavimo ustrezna polja (število najdenih zadetkov)
-
+        console.log(json.features);
+        document.getElementById(vrstaInteresneTocke + "_rezultati").innerHTML = json.features.length;
         // vrnemo rezultat
         callback(json);
     }
