@@ -41,13 +41,10 @@ window.addEventListener('load', function () {
 
   function obKlikuNaMapo(e) {
     var latlng = e.latlng;
-    popup
-      .setLatLng(latlng)
-      .setContent("Izbrana točka:" + latlng.toString())
-      .openOn(mapa);
-
     prikazPoti(latlng);
   }
+
+
 
   mapa.on('click', obKlikuNaMapo);
 
@@ -252,7 +249,31 @@ function prikazPoti(latLng) {
   // Izbrišemo obstoječo pot, če ta obstaja
   if (pot != null) mapa.removeControl(pot);
 
-  // pot = ...
+  var doFri = document.getElementById("idDoFri").checked ? true : false;
+
+  pot = doFri ?
+  L.Routing.control({
+    waypoints: [
+      latLng,
+      L.latLng(markerji[0]._latlng.lat, markerji[0]._latlng.lng),
+    ],
+    lineOptions: {
+      styles: [{color: '#242c81', opacity: 1, weight: 12}]
+   },
+   language: 'sl'
+  })
+  :
+  L.Routing.control({
+    waypoints: [
+      L.latLng(markerji[0]._latlng.lat, markerji[0]._latlng.lng),
+      latLng
+    ],
+    lineOptions: {
+      styles: [{color: '#242c81', opacity: 1, weight: 12}]
+   },
+   language: 'sl'
+  })
+  pot.addTo(mapa);
 }
 
 
