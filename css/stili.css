@@ -23,13 +23,18 @@ button {
   background: white;
 }
 
+.fakultete img {
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
 .restavracije {
   background: url(../slike/restaurant_logo_mini.png) no-repeat scroll;
   background-position: 4px 2px;
   height: 31px;
   padding: 7px;
   padding-left: 35px;
-  vertical-align: top
+  vertical-align: top;
 }
 
 telo {
